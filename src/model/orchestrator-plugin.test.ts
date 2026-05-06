@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 /**
  * Compatibility tests for the legacy orchestrator-plugin module name.
  *

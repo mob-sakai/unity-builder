@@ -10,7 +10,6 @@ const DEFAULT_PLUGIN_MODULE = '@game-ci/orchestrator';
  * an external implementation can extend or replace the local build flow.
  */
 export interface Plugin {
-  // eslint-disable-next-line no-unused-vars
   initialize(coreParameters: Record<string, any>, workspace: string): Promise<void>;
 
   /** Whether the plugin wants to handle the entire build. */
@@ -21,19 +20,15 @@ export interface Plugin {
    * If the plugin needs to fall back to a local build, it returns
    * { exitCode: -1, fallbackToLocal: true }.
    */
-  // eslint-disable-next-line no-unused-vars
   handleBuild(baseImage: string): Promise<{ exitCode: number; fallbackToLocal?: boolean }>;
 
   /** Pre-build hook for local builds. */
-  // eslint-disable-next-line no-unused-vars
   beforeLocalBuild(workspace: string): Promise<void>;
 
   /** Post-build hook for local builds. */
-  // eslint-disable-next-line no-unused-vars
   afterLocalBuild(workspace: string, exitCode: number): Promise<void>;
 
   /** Post-build hook for all build types. */
-  // eslint-disable-next-line no-unused-vars
   handlePostBuild(exitCode: number): Promise<void>;
 }
 
@@ -74,5 +69,8 @@ function isModuleNotFoundError(error: unknown): boolean {
     }
   }
 
-  return typeof (error as Error)?.message === 'string' && /cannot find module/i.test((error as Error).message);
+  return (
+    typeof (error as Error)?.message === 'string' &&
+    /cannot find module/i.test((error as Error).message)
+  );
 }
