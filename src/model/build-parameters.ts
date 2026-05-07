@@ -6,7 +6,7 @@ import UnityVersioning from './unity-versioning';
 import Versioning from './versioning';
 import { GitRepoReader } from './input-readers/git-repo';
 import { GithubCliReader } from './input-readers/github-cli';
-import { Cli } from './cli/cli';
+import { PluginOptions } from './plugin-options';
 import GitHub from './github';
 import * as core from '@actions/core';
 
@@ -73,6 +73,7 @@ class BuildParameters {
       Input.buildName,
       Input.targetPlatform,
       Input.androidExportType,
+      Input.linux64RemoveExecutableExtension,
     );
     const editorVersion = UnityVersioning.determineUnityVersion(
       Input.projectPath,
@@ -128,7 +129,7 @@ class BuildParameters {
     }
 
     const providerStrategy =
-      Input.getInput('providerStrategy') || (Cli.isCliMode ? 'aws' : 'local');
+      Input.getInput('providerStrategy') || (PluginOptions.isPluginMode ? 'aws' : 'local');
 
     return {
       editorVersion,
@@ -181,14 +182,19 @@ class BuildParameters {
         '0123456789abcdefghijklmnopqrstuvwxyz',
         4,
       )()}`,
-      isCliMode: Cli.isCliMode,
+      isCliMode: PluginOptions.isPluginMode,
       cacheUnityInstallationOnMac: Input.cacheUnityInstallationOnMac,
       unityHubVersionOnMac: Input.unityHubVersionOnMac,
       dockerWorkspacePath: Input.dockerWorkspacePath,
     };
   }
 
-  static parseBuildFile(filename: string, platform: string, androidExportType: string): string {
+  static parseBuildFile(
+    filename: string,
+    platform: string,
+    androidExportType: string,
+    linux64RemoveExecutableExtension: boolean,
+  ): string {
     if (Platform.isWindows(platform)) {
       return `${filename}.exe`;
     }
@@ -206,6 +212,10 @@ class BuildParameters {
             `Unknown Android Export Type: ${androidExportType}. Must be one of androidPackage for apk, androidAppBundle for aab, androidStudioProject for android project`,
           );
       }
+    }
+
+    if (platform === Platform.types.StandaloneLinux64 && !linux64RemoveExecutableExtension) {
+      return `${filename}.x86_64`;
     }
 
     return filename;
